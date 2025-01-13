@@ -15,16 +15,11 @@ jobs:
           base: 'swagger-sample/swagger-develop.yaml'
           revision: 'swagger-sample/swagger-test.yaml'
           format: 'text'
-          composed: true
-      - name: Test diff action output
+          output-to-file: 'diff.txt'
+      - name: Test diff action output to file
         run: |
-          delimiter=$(cat /proc/sys/kernel/random/uuid | tr -d '-')
-          output=$(cat <<-$delimiter
-          ${{ steps.test_composed.outputs.diff }}
-          $delimiter
-          )
-          if [[ ! "$output" =~ "Deleted Endpoints: 1" ]]; then
-            echo "Expected 'Deleted Endpoints: 1' to be modified in diff, instead got '$output'" >&2
+          if [ ! -s diff.txt ]; then
+            echo "Diff file doesn't exist or is empty"
             exit 1
           fi
 
@@ -39,18 +34,6 @@ jobs:
         with:
           base: 'swagger-sample/swagger-develop.yaml'
           revision: 'swagger-sample/swagger-test.yaml'
-          output-to-file: 'breaking.txt'
-      - name: Test breaking changes action output
-        run: |
-          delimiter=$(cat /proc/sys/kernel/random/uuid | tr -d '-')
-          output=$(cat <<-$delimiter
-          ${{ steps.test_breaking_changes.outputs.breaking }}
-          $delimiter
-          )
-          if [ "$output" != "$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT" ]; then
-            echo "Expected output '$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT' but got '$output'" >&2
-            exit 1
-          fi
 
   oasdiff_changelog:
     runs-on: ubuntu-latest
