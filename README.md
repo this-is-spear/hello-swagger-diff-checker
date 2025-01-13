@@ -8,9 +8,36 @@
 brew install oasdiff
 ```
 
-### Diff
 
-변경 부분 확인이 가능하다.
+### Git Actions 기능
+
+참고 자료 : https://github.com/oasdiff/oasdiff-action/blob/main/.github/workflows/test.yaml
+
+```yaml
+name: 'Test oasdiff actions'
+on:
+  pull_request:
+  push:
+jobs:
+  oasdiff_diff:
+    runs-on: ubuntu-latest
+    name: Test diff action
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Running OpenAPI Spec breaking action
+        uses: oasdiff/oasdiff-action/breaking@main
+        with:
+          base: 'swagger-sample/swagger-develop.yaml'
+          revision: 'swagger-sample/swagger-test.yaml'
+```
+
+<img width="1504" alt="스크린샷 2025-01-13 오후 11 18 51" src="https://github.com/user-attachments/assets/e8a7fc45-cee7-438c-a098-cc1ab6eb05f4" />
+
+
+### CLI 기능
+
+#### Diff
 
 ```shell
 oasdiff diff ./swagger-sample/swagger-develop.yaml ./swagger-sample/swagger-test.yaml
@@ -61,8 +88,7 @@ endpoints:
                                             to: ""
 ```
 
-
-### Breaking Changes
+#### Breaking Changes
 
 ```shell
 oasdiff breaking ./swagger-sample/swagger-develop.yaml ./swagger-sample/swagger-test.yaml
