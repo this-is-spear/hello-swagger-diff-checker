@@ -14,15 +14,71 @@ jobs:
         with:
           base: 'swagger-sample/swagger-develop.yaml'
           revision: 'swagger-sample/swagger-test.yaml'
+          format: 'text'
+          composed: true
+      - name: Test diff action output
+        run: |
+          delimiter=$(cat /proc/sys/kernel/random/uuid | tr -d '-')
+          output=$(cat <<-$delimiter
+          ${{ steps.test_composed.outputs.diff }}
+          $delimiter
+          )
+          if [[ ! "$output" =~ "Deleted Endpoints: 1" ]]; then
+            echo "Expected 'Deleted Endpoints: 1' to be modified in diff, instead got '$output'" >&2
+            exit 1
+          fi
 
+  oasdiff_breaking:
+    runs-on: ubuntu-latest
+    name: Test breaking action
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
       - name: Running OpenAPI Spec breaking action
         uses: oasdiff/oasdiff-action/breaking@main
         with:
           base: 'swagger-sample/swagger-develop.yaml'
           revision: 'swagger-sample/swagger-test.yaml'
+          output-to-file: 'breaking.txt'
+      - name: Test breaking changes action output
+        run: |
+          delimiter=$(cat /proc/sys/kernel/random/uuid | tr -d '-')
+          output=$(cat <<-$delimiter
+          ${{ steps.test_breaking_changes.outputs.breaking }}
+          $delimiter
+          )
+          if [ "$output" != "$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT" ]; then
+            echo "Expected output '$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT' but got '$output'" >&2
+            exit 1
+          fi
 
+  oasdiff_changelog:
+    runs-on: ubuntu-latest
+    name: Test breaking action
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
       - name: Running OpenAPI Spec changelog action
         uses: oasdiff/oasdiff-action/changelog@main
         with:
           base: 'swagger-sample/swagger-develop.yaml'
           revision: 'swagger-sample/swagger-test.yaml'
+          output-to-file: "changelog.txt"
+      - name: Test changelog action output
+        run: |
+          output=$(echo "${{steps.test_changelog.outputs.changelog}}" | head -n 1)
+          if [[  "${output}" != "${OASDIFF_ACTION_TEST_EXPECTED_OUTPUT}" ]]; then
+            echo "Expected output '$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT' but got '${output}'" >&2
+            exit 1
+          fi
+      - name: Test changelog action output to file
+        run: |
+          if [ ! -s changelog.txt ]; then
+            echo "Changelog file doesn't exist or is empty"
+            exit 1
+          fi
+          output=$(cat changelog.txt | head -n 1)
+          if [[  "${output}" != "${OASDIFF_ACTION_TEST_EXPECTED_OUTPUT}" ]]; then
+            echo "Expected output '$OASDIFF_ACTION_TEST_EXPECTED_OUTPUT' but got '${output}'" >&2
+            exit 1
+          fi
