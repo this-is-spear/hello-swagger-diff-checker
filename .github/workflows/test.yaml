@@ -1,0 +1,28 @@
+name: 'Test oasdiff actions'
+on:
+  pull_request:
+  push:
+jobs:
+  oasdiff_diff:
+    runs-on: ubuntu-latest
+    name: Test diff action
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Running OpenAPI Spec diff action
+        uses: oasdiff/oasdiff-action/diff@main
+        with:
+          base: 'swagger-sample/swagger-develop.yaml'
+          revision: 'swagger-sample/swagger-test.yaml'
+
+      - name: Running OpenAPI Spec breaking action
+        uses: oasdiff/oasdiff-action/breaking@main
+        with:
+          base: 'swagger-sample/swagger-develop.yaml'
+          revision: 'swagger-sample/swagger-test.yaml'
+
+      - name: Running OpenAPI Spec changelog action
+        uses: oasdiff/oasdiff-action/changelog@main
+        with:
+          base: 'swagger-sample/swagger-develop.yaml'
+          revision: 'swagger-sample/swagger-test.yaml'
