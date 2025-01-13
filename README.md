@@ -1,11 +1,24 @@
 
 
+### 필요한 라이브러리 설치
+
+참고 자료 : https://github.com/springdoc/springdoc-openapi-gradle-plugin
+
+```shell
+brew install oasdiff
+```
+
+### Diff
+
+변경 부분 확인이 가능하다.
+
+```shell
+oasdiff diff ./swagger-sample/swagger-develop.yaml ./swagger-sample/swagger-test.yaml
+```
+
+응답 값
 
 ```plaintext
-oasdiff diff  ./swagger-sample/swagger-develop.json ./swagger-sample/swagger-test.json 
-
-~/Documents/GitHub/hello-swagger-diff-checker git:[main]
-oasdiff diff ./swagger-sample/swagger-develop.yaml ./swagger-sample/swagger-test.yaml
 paths:
     modified:
         /hello:
@@ -48,12 +61,16 @@ endpoints:
                                             to: ""
 ```
 
-```plaintext
 
+### Breaking Changes
+
+```shell
 oasdiff breaking ./swagger-sample/swagger-develop.yaml ./swagger-sample/swagger-test.yaml
+```
+
+```plaintext
 1 changes: 1 error, 0 warning, 0 info
 error   [response-body-type-changed] at ./swagger-sample/swagger-test.yaml      
         in API GET /hello
                 the response's body type/format changed from 'integer'/'int32' to 'string'/'' for status '200'
-
 ```
